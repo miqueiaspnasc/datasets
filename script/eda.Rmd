@@ -1,0 +1,113 @@
+---
+title: "EDA - Acidentes de Trânsito no Estado de São Paulo"
+author: "Miquéias Pereira do Nascimento"
+date: "23 de dezembro de 2018"
+output: html_document
+---
+
+## Carregando as libs e preparando os dados
+```{r, message=FALSE, warning=FALSE}
+library(scales)
+library(plotly)
+library(dplyr)
+library(readr)
+library(lubridate)
+library(leaflet)
+
+at2015 <- read_delim("https://raw.githubusercontent.com/miqueiaspnasc/datasets/master/acidentes-transito-2015.csv", 
+    ";", escape_double = FALSE, locale = locale(encoding = "ISO-8859-1"), 
+    trim_ws = TRUE)
+
+at2016 <- read_delim("https://raw.githubusercontent.com/miqueiaspnasc/datasets/master/acidentes-transito-2016.csv", 
+    ";", escape_double = FALSE, locale = locale(encoding = "ISO-8859-1"), 
+    trim_ws = TRUE)
+
+at2017 <- read_delim("https://raw.githubusercontent.com/miqueiaspnasc/datasets/master/acidentes-transito-2017.csv", 
+    ";", escape_double = FALSE, locale = locale(encoding = "ISO-8859-1"), 
+    trim_ws = TRUE)
+
+at2018 <- read_delim("https://raw.githubusercontent.com/miqueiaspnasc/datasets/master/acidentes-transito-2018.csv", 
+    ";", escape_double = FALSE, locale = locale(encoding = "ISO-8859-1"), 
+    trim_ws = TRUE)
+
+at <- rbind(at2015, at2016, at2017, at2018)
+
+at %>% mutate(data = dmy(paste('01', at$`Mês Óbito`, at$`Ano Óbito`))) %>% 
+  mutate(Trimestre = quarter(data)) -> at
+
+at %>% mutate(lat = as.numeric(gsub(',', ".", at$`LAT_(geo)`))) -> at
+at %>% mutate(lon = as.numeric(gsub(',', ".", at$`LONG_(geo)`))) -> at
+
+```
+
+## Por ano
+
+```{r}
+
+at %>% count(`Ano Óbito`) %>%
+        ggplot(aes(x=`Ano Óbito`, y=n)) + geom_bar(stat='identity', fill='red') +
+        scale_y_continuous(labels=comma) +
+        labs(x='Ano', y='Número de Óbitos', title='Óbitos por Ano')
+
+```
+
+## Por trimestre
+
+
+```{r, message=FALSE, warning=FALSE}
+
+at %>% select(`Ano Óbito`, Trimestre) %>% group_by(`Ano Óbito`) %>% count(Trimestre) %>%
+        ggplot(aes(x=as.factor(Trimestre), y=n)) + geom_bar(stat='identity', fill='red') +
+        scale_y_continuous(labels=comma) + facet_grid(.~`Ano Óbito`) + labs(x='Trimestre', y='Número de Óbitos')
+
+```
+
+## Por mês
+
+
+```{r}
+
+at %>% count(data) %>% 
+        ggplot(aes(x=month(data, label=TRUE), y=n)) + geom_bar(stat='identity', fill='red') +
+        scale_y_continuous(labels=comma) +
+        labs(x='Mês', y='Número de Óbitos', title='Óbitos por Mês')
+```
+
+## Por dia da semana
+
+```{r}
+
+at %>% count(data) %>% 
+        ggplot(aes(x=wday(data, label=TRUE), y=n)) + geom_bar(stat='identity', fill='red') +
+        scale_y_continuous(labels=comma) +
+        labs(x='Dia', y='Número de Óbitos', title='Óbitos por Dia da Semana')
+```
+
+## Por Turno
+
+```{r}
+
+at %>% count(Turno) %>%
+        ggplot(aes(x=Turno, y=n)) + geom_bar(stat='identity', fill='red') +
+        scale_y_continuous(labels=comma) +
+        labs(x='Turno', y='Número de Óbitos', title='Óbitos por Turno')
+
+```
+
+
+## Distribuição dos acidentes
+```{r, message=FALSE, warning=FALSE}
+
+labels <- paste0("<strong>Cidade: </strong>", at$`Cidade Considerada`, 
+                 "<br><strong>Tipo de Acidente: </strong>", at$`Tipo Acidente`,
+                 "<br><strong>Tipo de Veículo: </strong>", at$`Tipo Veiculo`) %>% lapply(htmltools::HTML)
+
+at %>% filter(!is.na(lat) & !is.na(lon)) %>% leaflet() %>%
+        setView(lng=-48, lat=-22.5, zoom=7) %>%
+        addTiles() %>%
+        addProviderTiles("CartoDB.Positron") %>%
+        addScaleBar %>%
+        addMarkers(~lon, ~lat, label = labels,
+                clusterOptions = markerClusterOptions())
+
+```
