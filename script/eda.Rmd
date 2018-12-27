@@ -14,19 +14,19 @@ library(readr)
 library(lubridate)
 library(leaflet)
 
-at2015 <- read_delim("https://raw.githubusercontent.com/miqueiaspnasc/datasets/master/acidentes-transito-2015.csv", 
+at2015 <- read_delim("https://raw.githubusercontent.com/miqueiaspnasc/eda/master/data/acidentes-transito-2015.csv", 
     ";", escape_double = FALSE, locale = locale(encoding = "ISO-8859-1"), 
     trim_ws = TRUE)
 
-at2016 <- read_delim("https://raw.githubusercontent.com/miqueiaspnasc/datasets/master/acidentes-transito-2016.csv", 
+at2016 <- read_delim("https://raw.githubusercontent.com/miqueiaspnasc/eda/master/data/acidentes-transito-2016.csv", 
     ";", escape_double = FALSE, locale = locale(encoding = "ISO-8859-1"), 
     trim_ws = TRUE)
 
-at2017 <- read_delim("https://raw.githubusercontent.com/miqueiaspnasc/datasets/master/acidentes-transito-2017.csv", 
+at2017 <- read_delim("https://raw.githubusercontent.com/miqueiaspnasc/eda/master/data/acidentes-transito-2017.csv", 
     ";", escape_double = FALSE, locale = locale(encoding = "ISO-8859-1"), 
     trim_ws = TRUE)
 
-at2018 <- read_delim("https://raw.githubusercontent.com/miqueiaspnasc/datasets/master/acidentes-transito-2018.csv", 
+at2018 <- read_delim("https://raw.githubusercontent.com/miqueiaspnasc/eda/master/data/acidentes-transito-2018.csv", 
     ";", escape_double = FALSE, locale = locale(encoding = "ISO-8859-1"), 
     trim_ws = TRUE)
 
