@@ -1,9 +1,19 @@
 ---
 title: "EDA - Acidentes de Trânsito no Estado de São Paulo"
 author: "Miquéias Pereira do Nascimento"
-date: "23 de dezembro de 2018"
+date: "27 de dezembro de 2018"
 output: html_document
 ---
+
+```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+knitr::opts_chunk$set(fig.width=10, fig.height=6)
+```
+
+
+## Objetivo
+
+O presente estudo está em fase inicial e visa entender os registros dos acidentes de trânsito no Estado de São Paulo expondo as situações em que eles ocorrem e possibilitando a adoção de estratégias para minimizá-los.
+Os dados foram obtidos no portal do Movimento Paulista de Segurança no Trânsito (http://www.infosiga.sp.gov.br/Home/Relatorio) e contemplam o período de janeiro/2015 a novembro/2018
 
 ## Carregando as libs e preparando os dados
 ```{r, message=FALSE, warning=FALSE}
@@ -41,7 +51,7 @@ at %>% mutate(lon = as.numeric(gsub(',', ".", at$`LONG_(geo)`))) -> at
 ```
 
 ## Por ano
-
+ - O número de acidentes vem diminuindo desde 2016.
 ```{r}
 
 at %>% count(`Ano Óbito`) %>%
@@ -52,7 +62,7 @@ at %>% count(`Ano Óbito`) %>%
 ```
 
 ## Por trimestre
-
+ - O número de acidentes é maior no 2º e 3º trimestres, exceto no ano de 2015.
 
 ```{r, message=FALSE, warning=FALSE}
 
@@ -63,7 +73,7 @@ at %>% select(`Ano Óbito`, Trimestre) %>% group_by(`Ano Óbito`) %>% count(Trim
 ```
 
 ## Por mês
-
+  - O mês de julho tem o maior número de acidentes.
 
 ```{r}
 
@@ -74,7 +84,7 @@ at %>% count(data) %>%
 ```
 
 ## Por dia da semana
-
+  - O maior número dos acidentes ocorre no domingo.
 ```{r}
 
 at %>% count(data) %>% 
@@ -84,7 +94,7 @@ at %>% count(data) %>%
 ```
 
 ## Por Turno
-
+  - Aqui está claro que a maioria dos acidentes ocorre no período noturno (provavelmente entre às 18 e 23 horas).
 ```{r}
 
 at %>% count(Turno) %>%
@@ -96,18 +106,28 @@ at %>% count(Turno) %>%
 
 
 ## Distribuição dos acidentes
+- A Capital e cidades vizinhas tem o maior de número de acidentes, provavelmente devido ao grande número de habitantes.
+- 
 ```{r, message=FALSE, warning=FALSE}
-
-labels <- paste0("<strong>Cidade: </strong>", at$`Cidade Considerada`, 
-                 "<br><strong>Tipo de Acidente: </strong>", at$`Tipo Acidente`,
-                 "<br><strong>Tipo de Veículo: </strong>", at$`Tipo Veiculo`) %>% lapply(htmltools::HTML)
 
 at %>% filter(!is.na(lat) & !is.na(lon)) %>% leaflet() %>%
         setView(lng=-48, lat=-22.5, zoom=7) %>%
         addTiles() %>%
         addProviderTiles("CartoDB.Positron") %>%
         addScaleBar %>%
-        addMarkers(~lon, ~lat, label = labels,
+        addMarkers(~lon, ~lat, 
+              label = ~paste0("<strong>Cidade: </strong>", `Cidade Considerada`, 
+                 "<br><strong>Tipo de Acidente: </strong>", `Tipo Acidente`,
+                 "<br><strong>Tipo de Veículo: </strong>", `Tipo Veiculo`) %>% lapply(htmltools::HTML),
                 clusterOptions = markerClusterOptions())
 
 ```
+
+## Conclusão
+
+Muitas informações ainda podem ser extraídas desses registros, mas, como trata-se de um trabalho em desenvolvimento, foram expostos somente alguns pontos para a apresentação de uma visão geral.
+
+Os próximos passos são explorar os incidentes por gênero, faixa etária, cidade, tipo de acidente, via, tipo de veículo, relacionar esses dados com o número de habitantes por cidade (acredito que conseguirei esses dados no IBGE) para chegar a números relativos.
+
+
+
